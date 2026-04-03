@@ -673,21 +673,24 @@ function exportPDF() {
   doc.setFontSize(11); doc.setFont('helvetica','bold'); doc.text(getDesc(avg), M+68, y+40);
 
   y += 68;
-  const labelColW = 110;
-  const barStart = M + 110;
-  const maxBar = CW - 110 - labelColW - 8;
+  // Layout: [label 90pt] [bar 180pt] [score text 100pt] — all within CW=504pt
+  const catLabelW = 90;
+  const barW_max  = 180;
+  const barX      = M + catLabelW + 8;
+  const scoreX    = barX + barW_max + 10;
   doc.setTextColor(...GD); doc.setFontSize(11); doc.setFont('helvetica','bold');
   doc.text('Score by category', M, y); y+=10; hln(y, GN); y+=10;
   scores.forEach(s => {
     chk(34);
-    doc.setTextColor(...DT); doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.text(s.label, M, y+10);
-    doc.setFont('helvetica','normal'); doc.setTextColor(...GY);
-    doc.text(doc.splitTextToSize(s.sub, 105)[0], M, y+20);
-    const barW = s.val ? (s.val/5)*maxBar : 0;
-    doc.setFillColor(230,230,230); doc.roundedRect(barStart, y+4, maxBar, 10, 2, 2, 'F');
-    if (barW > 0) { doc.setFillColor(...GN); doc.roundedRect(barStart, y+4, barW, 10, 2, 2, 'F'); }
     doc.setTextColor(...DT); doc.setFontSize(9); doc.setFont('helvetica','bold');
-    doc.text(s.val ? `${s.val} — ${RATINGS[s.val]}` : '—', barStart + maxBar + 8, y+12);
+    doc.text(s.label, M, y+10);
+    doc.setFont('helvetica','normal'); doc.setTextColor(...GY);
+    doc.text(doc.splitTextToSize(s.sub, catLabelW + 4)[0], M, y+20);
+    const filledW = s.val ? (s.val / 5) * barW_max : 0;
+    doc.setFillColor(225,225,225); doc.roundedRect(barX, y+4, barW_max, 10, 2, 2, 'F');
+    if (filledW > 0) { doc.setFillColor(...GN); doc.roundedRect(barX, y+4, filledW, 10, 2, 2, 'F'); }
+    doc.setTextColor(...DT); doc.setFontSize(9); doc.setFont('helvetica','bold');
+    doc.text(s.val ? `${s.val} — ${RATINGS[s.val]}` : '—', scoreX, y+12);
     y += 34; hln(y-4);
   });
 
