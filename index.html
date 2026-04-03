@@ -651,11 +651,14 @@ function exportPDF() {
   ];
   if (st.type === 'supervisor') fields.push(['Reviewer', st.info.reviewer]);
   doc.setTextColor(...DT); doc.setFontSize(8);
+  const fieldColW = CW/2 - 78;
   fields.forEach((f, i) => {
     const col = i%2===0 ? M+10 : col2;
     const row = y + 16 + Math.floor(i/2) * 22;
     doc.setFont('helvetica','bold'); doc.text(f[0]+':', col, row);
-    doc.setFont('helvetica','normal'); doc.text(f[1]||'—', col+68, row);
+    doc.setFont('helvetica','normal');
+    const val = doc.splitTextToSize(f[1]||'—', fieldColW)[0];
+    doc.text(val, col+68, row);
   });
 
   y = 186;
@@ -670,18 +673,21 @@ function exportPDF() {
   doc.setFontSize(11); doc.setFont('helvetica','bold'); doc.text(getDesc(avg), M+68, y+40);
 
   y += 68;
-  const maxBar = CW - 100;
+  const labelColW = 110;
+  const barStart = M + 110;
+  const maxBar = CW - 110 - labelColW - 8;
   doc.setTextColor(...GD); doc.setFontSize(11); doc.setFont('helvetica','bold');
   doc.text('Score by category', M, y); y+=10; hln(y, GN); y+=10;
   scores.forEach(s => {
     chk(34);
     doc.setTextColor(...DT); doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.text(s.label, M, y+10);
-    doc.setFont('helvetica','normal'); doc.setTextColor(...GY); doc.text(s.sub, M, y+20);
+    doc.setFont('helvetica','normal'); doc.setTextColor(...GY);
+    doc.text(doc.splitTextToSize(s.sub, 105)[0], M, y+20);
     const barW = s.val ? (s.val/5)*maxBar : 0;
-    doc.setFillColor(230,230,230); doc.roundedRect(M+100, y+4, maxBar, 10, 2, 2, 'F');
-    if (barW > 0) { doc.setFillColor(...GN); doc.roundedRect(M+100, y+4, barW, 10, 2, 2, 'F'); }
+    doc.setFillColor(230,230,230); doc.roundedRect(barStart, y+4, maxBar, 10, 2, 2, 'F');
+    if (barW > 0) { doc.setFillColor(...GN); doc.roundedRect(barStart, y+4, barW, 10, 2, 2, 'F'); }
     doc.setTextColor(...DT); doc.setFontSize(9); doc.setFont('helvetica','bold');
-    doc.text(s.val ? `${s.val} — ${RATINGS[s.val]}` : '—', M+100+maxBar+8, y+12);
+    doc.text(s.val ? `${s.val} — ${RATINGS[s.val]}` : '—', barStart + maxBar + 8, y+12);
     y += 34; hln(y-4);
   });
 
